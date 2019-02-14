@@ -1,0 +1,25 @@
+$images-per-row: 15;
+$images-width: 100%/$images-per-row;
+$images-margin: 10px;
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.influencers {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  margin: $images-margin;
+
+  img.influencer-img {
+    box-sizing: border-box;
+    flex-basis: $images-width;
+    flex-grow: 0;
+    flex-shrink: 0;
+    margin: $images-margin;
+  }
+}
+
+

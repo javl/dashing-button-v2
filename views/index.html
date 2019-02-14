@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Dashing Button</title>
+	<link rel="stylesheet" type="text/css" href="/css/stylesheet.css">
+</head>
+<body>
+	<div class="influencers">
+	{% for influencer in influencers %}
+		<div class="influencer-image">
+			<img src="/images/profile-images/{{influencer}}.jpg" />
+		</div>
+	{% endfor %}
+	</div>
+	<script type="text/javascript" src="/js/jquery.min.js"></script>
+	<script type="text/javascript" src="/js/script.js"></script>
+</body>
+</html>
