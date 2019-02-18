@@ -33,6 +33,16 @@ app.get('/', function(req, res) {
   });
 });
 
+
+app.get('/api/influencer', function(req, res) {
+  console.log(req.query.influencer_name);
+  return 'ok';
+  // res.render('index.html', {
+  //   influencers: influencers
+  // });
+});
+
+
 app.get('/run_detection', function(req, res) {
   // res.render('index.html', {
     // influencers: influencers
@@ -73,6 +83,7 @@ app.get('/get_all', function(req, res) {
 
 
 
+
 function get_latest_image(influencer){
   console.log('get_latest_image('+influencer+')');
   // const ls = spawn('instagram-scraper', ['@insta_args.txt', influencer, '--maximum=1', '--media-types=image', '--destination=profiles', '--retain-username'], {
@@ -96,7 +107,7 @@ function get_latest_image(influencer){
 
 
 
-app.listen(8080, function (err) {
+app.listen(8000, function (err) {
   if (err) {
     console.log(err);
   } else {

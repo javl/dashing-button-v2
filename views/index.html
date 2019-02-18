@@ -8,7 +8,7 @@
 <body>
 	<div class="influencers">
 	{% for influencer in influencers %}
-		<div class="influencer-img">
+		<div class="influencer-img" data-name="{{influencer}}">
 			<img src="/images/profile-images/{{influencer}}.jpg" />
 		</div>
 	{% endfor %}
