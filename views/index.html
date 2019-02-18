@@ -1,19 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
 	<title>Dashing Button</title>
+	<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
 	<link rel="stylesheet" type="text/css" href="/css/stylesheet.css">
+	<link rel='stylesheet' href='/bootstrap-4.3.1-dist/css/bootstrap.min.css' >
 </head>
+
 <body>
+
+<!-- Button trigger modal -->
+<!-- Modal -->
+<div class="modal fade" id="loadingModal" tabindex="-1" role="dialog" aria-labelledby="loadingModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+      		<span class="loading-text"></span>
+      		<br />
+      		<br />
+      		<div class="spinner-border" role="status">
+  				<span class="sr-only">Loading...</span>
+			</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<div class="row">
+					<div class="col-md-3">
+						<img class="modal-avatar rounded-circle" src="" alt="">
+					</div>
+					<div class="col-md-5">
+						<span class='modal-influencer-name'></span>
+					</div>
+					<div class="col-md-4">
+
+					</div>
+				</div>
+
+			</div>
+			<div class="modal-body text-center">
+				<img class="latest-img" src="" /><!--  width="200" height="200"/> -->
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="analyzingModal" tabindex="-1" role="dialog" aria-labelledby="analyzingModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-body text-center">
+				Now analyzing image to find possible products...<br /><br />
+				<div class="spinner-border" role="status">
+  					<span class="sr-only">Loading...</span>
+				</div>
+
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- 	<div class="loading-popup hidden-at-start">
+		<div class="content">
+			<span class="loading-text"></span><br />
+			<img class="loader" src="/img/loader.gif" />
+		</div>
+	</div>
+
+	<div class="image-popup hidden-at-start">
+		name
+		<div class="content">
+			<img class="latest-img" src="" />
+		</div>
+	</div>
+ -->
+
 	<div class="influencers">
 	{% for influencer in influencers %}
-		<div class="influencer-img" data-name="{{influencer}}">
-			<img src="/images/profile-images/{{influencer}}.jpg" />
-		</div>
+		<img class="influencer-img rounded-circle" data-name="{{influencer}}" src="/profiles/{{influencer}}/avatar.jpg" />
 	{% endfor %}
 	</div>
-	<script type="text/javascript" src="/js/jquery.min.js"></script>
+	<script src="/js/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
+	<script src="/bootstrap-4.3.1-dist/js/bootstrap.bundle.min.js" integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o" crossorigin="anonymous"></script>
 	<script type="text/javascript" src="/js/script.js"></script>
+
 </body>
 </html>
