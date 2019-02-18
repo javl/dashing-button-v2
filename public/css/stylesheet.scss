@@ -13,12 +13,17 @@ body {
   justify-content: space-around;
   margin: $images-margin;
 
-  img.influencer-img {
+  .influencer-img {
     box-sizing: border-box;
     flex-basis: $images-width;
     flex-grow: 0;
     flex-shrink: 0;
     margin: $images-margin;
+
+    img {
+          border-radius: 50%;
+
+    }
   }
 }
 

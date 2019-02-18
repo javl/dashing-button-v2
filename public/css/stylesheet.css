@@ -1,2 +1,2 @@
-body{margin:0;padding:0}.influencers{display:flex;flex-wrap:wrap;justify-content:space-around;margin:10px}.influencers img.influencer-img{box-sizing:border-box;flex-basis:6.6666666667%;flex-grow:0;flex-shrink:0;margin:10px}
+body{margin:0;padding:0}.influencers{display:flex;flex-wrap:wrap;justify-content:space-around;margin:10px}.influencers .influencer-img{box-sizing:border-box;flex-basis:6.6666666667%;flex-grow:0;flex-shrink:0;margin:10px}.influencers .influencer-img img{border-radius:50%}
 /*# sourceMappingURL=stylesheet.css.map */
