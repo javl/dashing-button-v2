@@ -1,0 +1,74 @@
+from pydhcplib.dhcp_network import *
+import os
+import time
+# import OSC
+# c = OSC.OSCClient()
+# c.connect(('192.168.0.145', 12345))   # connect to SuperCollider
+#oscmsg = OSC.OSCMessage()
+#oscmsg.setAddress("/dashbutton")
+#oscmsg.append('hello')
+#c.send(oscmsg)
+
+#import argparse
+#parser = argparse.ArgumentParser()
+#parser.add_argument("--ip", default="127.0.0.1",
+#    help="The ip of the OSC server")
+#parser.add_argument("--port", type=int, default=5005,
+#    help="The port the OSC server is listening on")
+#args = parser.parse_args()
+
+
+# Setup OSC
+#client = udp_client.SimpleUDPClient(args.ip, args.port)
+lastPress = None
+
+def do_something():
+    global lastPress
+    if lastPress != None:
+        if time.time() - lastPress < 2:
+            return
+    lastPress = time.time()
+    print("button has been pressed, use curl")
+    os.system('curl localhost:8000/button_pressed')
+
+netopt = {'client_listen_port':"68", 'server_listen_port':"67", 'listen_address':"0.0.0.0"}
+
+class Server(DhcpServer):
+    def __init__(self, options, dashbuttons):
+        DhcpServer.__init__(self, options["listen_address"],
+	    options["client_listen_port"],
+            options["server_listen_port"])
+        self.dashbuttons = dashbuttons
+
+    def HandleDhcpRequest(self, packet):
+        mac = self.hwaddr_to_str(packet.GetHardwareAddress())
+        self.dashbuttons.press(mac)
+
+
+    def hwaddr_to_str(self, hwaddr):
+        result = []
+        hexsym = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']
+        for iterator in range(6) :
+            result += [str(hexsym[hwaddr[iterator]/16]+hexsym[hwaddr[iterator]%16])]
+        return ':'.join(result)
+
+class DashButtons():
+    def __init__(self):
+        self.buttons = {}
+
+    def register(self, mac, function):
+        self.buttons[mac] = function
+
+    def press(self, mac):
+        if mac in self.buttons:
+            self.buttons[mac]()
+            return True
+        return False
+
+dashbuttons = DashButtons()
+dashbuttons.register("18:74:2e:09:d0:07", do_something)
+server = Server(netopt, dashbuttons)
+
+while True :
+    server.GetNextDhcpPacket()
+
