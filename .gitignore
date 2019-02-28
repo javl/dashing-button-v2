@@ -1,3 +1,6 @@
 dashing-button.sublime-workspace
 node_modules
 credentials.js
+# exclude photos but not the gitkeep file
+/public/profiles/*
+!/public/profiles/.gitkeep
