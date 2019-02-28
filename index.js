@@ -179,6 +179,9 @@ function analyze_image(imageUrl){
       console.log('no color found?')
     }
     console.log(result);
+    if (result.tags === undefined){
+      result.tags = [];
+    }
     result.tags.forEach(function(tag, index){
       if(tag.name != 'person'){
         useful_tags.push(tag)
@@ -210,10 +213,10 @@ app.listen(8000, function (err) {
 });
 
 
+
+
 async function get_amazon_screenshot(keywords){
-  console.log("get amazon screenshot");
-  console.log("step one");
-    const browser = await puppeteer.launch({"headless": false, "executablePath":"/usr/bin/chromium"});
+    const browser = await puppeteer.launch({"headless": true, "executablePath":"/usr/bin/chromium"});
     const page = await browser.newPage();
     console.log("open page");
     await page.goto(amazon_url + keywords.join('+'));
@@ -221,33 +224,36 @@ async function get_amazon_screenshot(keywords){
       "width": 1024,
       "height": 1080,
     });
-    // console.log("screenshot");
-    // await page.screenshot({
-    //   path: 'public/amazon_full.jpg',
-    //   fullPage: true,
-    //   // omitBackground: true,
-    //   // clip: { // clip the cookie notice
-    //   //  'x': 0,
-    //   //  'y': 62,
-    //   //  'width': 1920,
-    //   //  'height': 1080
-    //   // }
-    // });
    const links = await page.evaluate(() => {
     const links = Array.from(document.querySelectorAll('.s-access-detail-page'))
     return links.map(link => link.href).slice(0, 10)
     })
    // console.log(links);
     await page.goto(links[0])
+
+    await page.addStyleTag({content: '.nav-flyout-anchor{display: "none"}'})
+
+    await page.evaluate(() => {
+      const loginButton = document.querySelector('.nav-flyout-anchor');
+      if (loginButton !== null){
+        loginButton.parentNode.removeChild(loginButton);
+      }else{
+        console.log("liginBUtton is null")
+      }
+    });
+
     await page.screenshot({
       path: 'public/amazon_detail.jpg',
-      fullPage: true,
-    //   // omitBackground: true,
-    //   // clip: { // clip the cookie notice
-    //   //  'x': 0,
-    //   //  'y': 62,
-    //   //  'width': 1920,
-    //   //  'height': 1080
-    //   // }
+      fullPage: false,
+      // omitBackground: true,
+      clip: { // clip the cookie notice
+       'x': 0,
+       'y': 0,
+       'width': 800,
+       'height': 700
+      }
     });
+    send_to_clients({
+      command: 'got_amazon'
+    })
 }

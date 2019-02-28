@@ -20,6 +20,7 @@ ws.onmessage = function (ev) {
     	})
     	$('.tags-list').html(tags);
     	$('.title-analyzing').html('<h4>'+data.tags.length+' Tags found</h4>');
+    	$('.amazon-searching-text').html('Searching for matching product on Amazon...');
     }
     else if(data.command == 'error'){
     	error_and_restart();
@@ -29,6 +30,10 @@ ws.onmessage = function (ev) {
     		working = true;
     		restart();
     	}
+    }
+    else if(data.command == 'got_amazon'){
+    	$('.latest-amazon-img').attr('src', 'amazon_detail.jpg');
+    	$('#sideBySideModal').modal('show');
     }
 }
 
