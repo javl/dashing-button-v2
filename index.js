@@ -205,7 +205,7 @@ app.listen(8000, function (err) {
   if (err) {
     console.log(err);
   } else {
-    console.log("App started at port 8080");
+    console.log("App started at port 8000");
   }
 });
 
