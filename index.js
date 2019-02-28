@@ -5,11 +5,12 @@ const fs = require("fs"); // for reading json files
 const ms = require('./microsoft_settings');
 const puppeteer = require('puppeteer-core');
 
-const subscriptionKey = ms.key;
-// load 3rd party modules
+// Get instagram details from credentials file
+const instaUser = require('./credentials').instaUser;
+const instaPassword = require('./credentials').instaPassword;
+
 var nunjucks       = require('nunjucks');
-// var moment         = require('moment');
-// var exec           = require('child_process').exec; // used for dig, shutdown, etc.
+
 const { spawn }    = require('child_process');
 const express      = require('express');
 
@@ -121,8 +122,7 @@ function get_latest_image(influencer){
 
   // return;
   console.log('get_latest_image('+influencer+')');
-  // const ls = spawn('instagram-scraper', ['@insta_args.txt', influencer, '--maximum=1', '--media-types=image', '--destination=profiles', '--retain-username'], {
-  const ls = spawn('instagram-scraper', ['@insta_args.txt', influencer, '--maximum=1', '--media-types=image', '--destination=public/profiles', '--retain-username', '--media-metadata'], {
+  const ls = spawn(' instagram-scraper', ['--login-user='+instaUser, '--login-password='+instaPassword, influencer, '--maximum=1', '--media-types=image', '--destination=public/profiles', '--retain-username', '--media-metadata'], {
     cwd: '/home/javl/projects/dashing-button-v2'
   });
   ls.stdout.on('data', (data) => {
