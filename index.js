@@ -7,7 +7,7 @@ const puppeteer = require('puppeteer-core');
 
 // Get instagram details from credentials file
 const instaUser = require('./credentials').instaUser;
-const instaPassword = require('./credentials').instaPassword;
+const instaPass = require('./credentials').instaPass;
 
 var nunjucks       = require('nunjucks');
 
@@ -122,9 +122,10 @@ function get_latest_image(influencer){
 
   // return;
   console.log('get_latest_image('+influencer+')');
-  const ls = spawn(' instagram-scraper', ['--login-user='+instaUser, '--login-password='+instaPassword, influencer, '--maximum=1', '--media-types=image', '--destination=public/profiles', '--retain-username', '--media-metadata'], {
-    cwd: '/home/javl/projects/dashing-button-v2'
+  const ls = spawn(' instagram-scraper', ['--login-user '+instaUser, '--login-pass '+instaPass, influencer, '--maximum=1', '--media-types=image', '--destination=public/profiles', '--retain-username', '--media-metadata'], {
+    cwd: __dirname // run in this script's directory
   });
+
   ls.stdout.on('data', (data) => {
     console.log(`stdout: ${data}`);
   });
