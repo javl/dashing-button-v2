@@ -26,6 +26,21 @@
   </div>
 </div>
 
+<div class="modal fade" id="amazonLoadingModal" tabindex="-1" role="dialog" aria-labelledby="amazonLoadingModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content pb-2">
+      <div class="modal-body text-center">
+      		<span class="loading-text"></span>
+      		<br />
+      		<br />
+      		<div class="spinner-border" role="status">
+  				<span class="sr-only">Searching for matching products on Amazon...</span>
+			</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
@@ -60,6 +75,7 @@
 						</div>
 						<br />
 						<span class="tags-list text-muted text-small"></span>
+						<span class="amazon-searching-text"></span>
 					</div>
 				</div>
 			</div>
@@ -68,40 +84,40 @@
 	</div>
 </div>
 
-<!-- <div class="modal fade" id="analyzingModal" tabindex="-1" role="dialog" aria-labelledby="analyzingModalLabel" aria-hidden="true">
-	<div class="modal-dialog modal-lg" role="document">
+<div class="modal fade" id="sideBySideModal" tabindex="-1" role="dialog" aria-labelledby="sideBySideModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-xxl" role="document">
 		<div class="modal-content">
 			<div class="modal-body text-center">
-				Now analyzing image to find possible products...<br /><br />
-				<div class="spinner-border" role="status"></div>
+				<div class="row pb-2">
+					<div class="col-md-1 text-left">
+						<img class="modal-avatar rounded-circle" src="" alt="">
+					</div>
+					<div class="col-md-11 text-left">
+						<h4 class='modal-influencer-name'></h4><img class="verified" src="/img/verified.png" />
+					</div>
+				</div>
 
+				<div class="row">
+					<div class="col-md-5">
+						<img class="latest-img" src="" />
+					</div>
+					<div class="col-md-7">
+						<img class="latest-amazon-img" src="" />
+					</div>
+				</div>
 			</div>
+
 		</div>
 	</div>
 </div>
- -->
-<!-- 	<div class="loading-popup hidden-at-start">
-		<div class="content">
-			<span class="loading-text"></span><br />
-			<img class="loader" src="/img/loader.gif" />
-		</div>
-	</div>
 
-	<div class="image-popup hidden-at-start">
-		name
-		<div class="content">
-			<img class="latest-img" src="" />
-		</div>
+<div class="influencers">
+{% for influencer in influencers %}
+	<div class="influencer rounded-circle" data-name="{{influencer}}">
+		<img class="influencer-img rounded-circle" data-name="{{influencer}}" src="/profiles/{{influencer}}/avatar.jpg" />
 	</div>
- -->
-
-	<div class="influencers">
-	{% for influencer in influencers %}
-		<div class="influencer rounded-circle" data-name="{{influencer}}">
-			<img class="influencer-img rounded-circle" data-name="{{influencer}}" src="/profiles/{{influencer}}/avatar.jpg" />
-		</div>
-	{% endfor %}
-	</div>
+{% endfor %}
+</div>
 	<script src="/js/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
 	<script src="/bootstrap-4.3.1-dist/js/bootstrap.bundle.min.js" integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o" crossorigin="anonymous"></script>
 	<script type="text/javascript" src="/js/script.js"></script>
