@@ -3,7 +3,7 @@
 const microsoftSubscriptionKey = require('./credentials.js').microsoftSubscriptionKey;
 
 // ---------------------------------------------------
-const uriBase = 'https://westcentralus.api.cognitive.microsoft.com/vision/v2.0/analyze';
+const uriBase = ' https://westeurope.api.cognitive.microsoft.com/vision/v2.0/analyze';
 module.exports.uriBase = uriBase;
 
 // ---------------------------------------------------

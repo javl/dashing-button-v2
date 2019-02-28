@@ -3,7 +3,8 @@ process.env.TZ = 'Europe/Amsterdam';
 const request = require('request');
 const fs = require("fs"); // for reading json files
 const ms = require('./microsoft_settings');
-const puppeteer = require('puppeteer-core');
+const puppeteer = require('puppeteer');
+// const puppeteer = require('puppeteer-core');
 
 // Get instagram details from credentials file
 const instaUser = require('./credentials').instaUser;
@@ -122,19 +123,22 @@ function get_latest_image(influencer){
 
   // return;
   console.log('get_latest_image('+influencer+')');
-  const ls = spawn(' instagram-scraper', ['--login-user '+instaUser, '--login-pass '+instaPass, influencer, '--maximum=1', '--media-types=image', '--destination=public/profiles', '--retain-username', '--media-metadata'], {
+  const child = spawn('instagram-scraper', ['--login-user=instaUser', '--login-pass=instaPass', influencer, '--maximum=1', '--media-types=image', '--destination=public/profiles', '--retain-username', '--media-metadata'], {
     cwd: __dirname // run in this script's directory
   });
+  child.on('error', function(err) {
+    console.log(`Error on spawning child: ${err}`);
+  });
 
-  ls.stdout.on('data', (data) => {
+  child.stdout.on('data', (data) => {
     console.log(`stdout: ${data}`);
   });
 
-  ls.stderr.on('data', (data) => {
+  child.stderr.on('data', (data) => {
     console.log(`stderr: ${data}`);
   });
 
-  ls.on('close', (code) => {
+  child.on('close', (code) => {
     console.log(`child process exited with code ${code}`);
     if (code == 0){
       send_to_clients({
@@ -210,18 +214,24 @@ app.listen(8000, function (err) {
   }
 });
 
-
 async function get_amazon_screenshot(keywords){
-  console.log("get amazon screenshot");
-  console.log("step one");
-    const browser = await puppeteer.launch({"headless": false, "executablePath":"/usr/bin/chromium"});
-    const page = await browser.newPage();
-    console.log("open page");
-    await page.goto(amazon_url + keywords.join('+'));
-    await page.setViewport({
-      "width": 1024,
-      "height": 1080,
+    console.log("get amazon screenshot");
+    console.log("step one");
+    var target_url = amazon_url + keywords.slice(0, 5).join('+');
+    console.log("open page: " + target_url);
+    const browser = await puppeteer.launch({
+      // args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      headless: false,
+      // executablePath:"/usr/bin/chromium",
     });
+    const page = await browser.newPage();
+    console.log('goto page');
+    await page.setViewport({
+      "width": 1000,
+      "height": 800,
+    });
+    console.log('goto page');
+    await page.goto(target_url);
     // console.log("screenshot");
     // await page.screenshot({
     //   path: 'public/amazon_full.jpg',
@@ -238,11 +248,15 @@ async function get_amazon_screenshot(keywords){
     const links = Array.from(document.querySelectorAll('.s-access-detail-page'))
     return links.map(link => link.href).slice(0, 10)
     })
+   if (links.length > 0){
+    console.log("has links!")
    // console.log(links);
+   console.log("go to link")
     await page.goto(links[0])
+    console.log("take screenshot")
     await page.screenshot({
       path: 'public/amazon_detail.jpg',
-      fullPage: true,
+      fullPage: false,
     //   // omitBackground: true,
     //   // clip: { // clip the cookie notice
     //   //  'x': 0,
@@ -251,4 +265,9 @@ async function get_amazon_screenshot(keywords){
     //   //  'height': 1080
     //   // }
     });
+    console.log("DONE!");
+  }else{
+    console.log("nothing found...")
+  }
 }
+// get_amazon_screenshot(['dark', 'spectacles', 'sunglasses', 'goggles', 'music', 'fashion', 'face', 'band']);
