@@ -11,7 +11,7 @@ ws.onmessage = function (ev) {
     console.log(data);
 
     if(data.command == 'influencer_updated'){
-    	show_media();
+    	show_media(data.filename);
     }
     else if (data.command == 'tags'){
     	var tags = '';
@@ -32,12 +32,12 @@ ws.onmessage = function (ev) {
     	}
     }
     else if(data.command == 'got_amazon'){
-    	$('.latest-amazon-img').attr('src', 'amazon_detail.jpg');
+    	$('.latest-amazon-img').attr('src', '/amazon/'+data.image_filename);
     	$('#sideBySideModal').modal('show');
     }
-}
+};
 
-function show_media(){
+function show_media(filename){
 	console.log('show media');
 	if(spinning){
 		console.log('wait for spinner');
@@ -45,7 +45,7 @@ function show_media(){
 		return;
 	}
 	$('#loadingModal').modal('hide');
-	$('.latest-img').attr('src', '/profiles/'+data.influencer+'/latest_image.jpg');
+	$('.latest-img').attr('src', '/profiles/'+data.influencer+'/'+filename);
 	$('.influencer-img[data-name="'+data.influencer+'"]').attr('src', '/profiles/'+data.influencer+'/avatar.jpg');
 	$('.modal-avatar').attr('src', '/profiles/'+data.influencer+'/avatar.jpg');
 	$('.modal-influencer-name').html(data.influencer);
