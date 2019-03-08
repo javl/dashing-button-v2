@@ -75,3 +75,14 @@ module.exports.influencers = ['alexstrohl',
 	'zendaya',
 	'zoellad'
 ];
+
+// module.exports.influencers = [
+// 	'Hozier',
+// 	'sciencesnapstories',
+// 	'thenotoriousmma',
+// 	'samanthamumba',
+// 	'chrisodowd',
+// 	'jamesalankavanagh',
+// 	'rubberbanditsofficial'
+// ];
+
