@@ -62,8 +62,9 @@ function highlight_random_influencer(){
 }
 
 function highlight_influencer(influencer){
-	$('.selected').removeClass('selected');
-	$('.influencer[data-name="'+influencer+'"]').addClass('selected');
+	// $('.selected').removeClass('selected').addClass('fadeOut');
+	$('.influencer').removeClass('selected').addClass('fade-out');
+	$('.influencer[data-name="'+influencer+'"]').removeClass('fade-out').addClass('selected');
 }
 
 function select_influencer(){
@@ -72,44 +73,44 @@ function select_influencer(){
 }
 
 // Randomly select influencers as if we're picking a random one
+// var spin_speed = 50;
 var spin_speed = 50;
 var spinning = false;
 function spin_influencers (final_influencer) {
 	spinning = true;
-	// if (spin_speed<=800) {
-	if (spin_speed<=100) {
+	if (spin_speed<=800) {
+	// if (spin_speed<=100) {
 		highlight_random_influencer();
 		spin_speed*=1.1;
 		setTimeout(function(){
-			spin_influencers(final_influencer)
+			spin_influencers(final_influencer);
 		}, spin_speed);
 	}else{
-		console.log('show loader')
 		highlight_influencer(final_influencer);
-		spin_speed = 50;
-		var postfix = '\'';
-		if (final_influencer.substr(-1) != 's'){
-			postfix += 's';
-		}
-		$('.loading-text').html('<h4>Searching for <strong>@'+final_influencer+'</strong>'+postfix+' latest Instagram post...</h4>')
-		$('#loadingModal').modal('show');
 		setTimeout(function(){
-			spinning = false;
+			spin_speed = 50; // reset spin speed for next time
+			var postfix = '\'';
+			if (final_influencer.substr(-1) != 's'){
+				postfix += 's';
+			}
+			$('.loading-text').html('<h4>Searching for <strong>@'+final_influencer+'</strong>'+postfix+' latest Instagram post...</h4>')
+			$('#loadingModal').modal('show');
+			setTimeout(function(){
+				spinning = false;
+			}, 2000);
 		}, 2000);
 	}
 }
 
 function restart(preset_influencer=null){
-	console.log("preset: "+preset_influencer)
+	$('.influencer').removeClass('fade-out');
 	var influencer = preset_influencer;
 	if (preset_influencer === null){
 		influencer = select_influencer();
 	}
 	$('.title-analyzing').html('<h4>Analyzing image...</h4><div class="spinner-border" role="status"></div>');
-	console.log('influencer: ', influencer);
 	spin_influencers(influencer);
-	get_influencer_media(influencer);
-
+	// get_influencer_media(influencer);
 }
 
 $(function() {

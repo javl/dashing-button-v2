@@ -117,17 +117,19 @@ function get_latest_image(influencer){
     });
 
     child.on('close', (code) => {
-        console.log(`child process exited with code ${code}`);
-        if (code == 0){
 
+        if (code == 0){
             try {
                 var media_metadata = require('./public/profiles/'+influencer+'/'+influencer+'.json');
-                var useIndex = 0;
+                var useIndex = -1;
                 for (var i=0;i<media_metadata.length; i++){
-                    if (media_metadata[i].__typename == 'GraphImage'){
+                    if (media_metadata[i].__typename == 'GraphImage' || media_metadata[i].__typename == 'GraphSidecar' ){
                         useIndex = i;
                         break;
                     }
+                }
+                if (useIndex == -1){
+                    console.log('somehow we didn\'t get a GraphImage or GraphSidecar?');
                 }
                 var filename = media_metadata[useIndex].display_url.split('/');
                 filename = filename[filename.length-1].split('?')[0];
@@ -149,6 +151,9 @@ function get_latest_image(influencer){
                     command: 'error'
                 });
             }
+        }
+        else {
+            console.log(`instagram-scraper child process exited with code ${code}`);
         }
     });
 }
