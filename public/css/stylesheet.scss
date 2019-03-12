@@ -64,23 +64,27 @@ body {
   }
 }
 
-.slide {
-  display: none;
-}
-.slide-1 {
-  display: block;
-}
-
-.progressdot {
-  display: none;
-}
-.progressdot-1 {
-  display: block;
-}
-
 #introModal {
   .modal-dialog {
     margin-top: 220px;
+    text-align: center;
+
+    .slide {
+      display: none;
+      margin: auto;
+    }
+    .slide-1 {
+      display: block;
+    }
+
+    .progressdot {
+      display: none;
+      margin: auto;
+    }
+    .progressdot-1 {
+      display: block;
+    }
+
   }
 }
 

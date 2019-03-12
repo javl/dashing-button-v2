@@ -374,7 +374,8 @@ function error_and_restart(){
 
 $('#introModal').modal('show');
 var current_slide = 1;
-var slide_delays = [10000, 10000, 6, 10000, 10000, 10000, 10000];
+var slide_delays = [10000, 10000, 6000, 10000, 10000, 10000, 10000];
+// var slide_delays = [1000, 1000, 1000, 1000, 1000, 1000, 1000];
 
 function next_slide(){
 	$('.slide-'+current_slide).fadeOut('fast', function(){
