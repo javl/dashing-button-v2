@@ -1,25 +1,11 @@
 from pydhcplib.dhcp_network import *
 import os
 import time
-# import OSC
-# c = OSC.OSCClient()
-# c.connect(('192.168.0.145', 12345))   # connect to SuperCollider
-#oscmsg = OSC.OSCMessage()
-#oscmsg.setAddress("/dashbutton")
-#oscmsg.append('hello')
-#c.send(oscmsg)
 
-#import argparse
-#parser = argparse.ArgumentParser()
-#parser.add_argument("--ip", default="127.0.0.1",
-#    help="The ip of the OSC server")
-#parser.add_argument("--port", type=int, default=5005,
-#    help="The port the OSC server is listening on")
-#args = parser.parse_args()
-
-
-# Setup OSC
-#client = udp_client.SimpleUDPClient(args.ip, args.port)
+show_all_devices = False
+if len(sys.argv) > 1:
+    show_all_devices = True
+seen_devices = {}
 lastPress = None
 
 def do_something():
@@ -36,7 +22,7 @@ netopt = {'client_listen_port':"68", 'server_listen_port':"67", 'listen_address'
 class Server(DhcpServer):
     def __init__(self, options, dashbuttons):
         DhcpServer.__init__(self, options["listen_address"],
-	    options["client_listen_port"],
+        options["client_listen_port"],
             options["server_listen_port"])
         self.dashbuttons = dashbuttons
 
@@ -63,10 +49,20 @@ class DashButtons():
         if mac in self.buttons:
             self.buttons[mac]()
             return True
+        elif show_all_devices:
+            if mac in seen_devices:
+                seen_devices[mac]+=1
+            else:
+                seen_devices[mac]=1
+            print(seen_devices)
+            print("----")
         return False
 
 dashbuttons = DashButtons()
 dashbuttons.register("18:74:2e:09:d0:07", do_something)
+# dashbuttons.register("", do_something)
+# dashbuttons.register("", do_something)
+# dashbuttons.register("", do_something)
 server = Server(netopt, dashbuttons)
 
 while True :
