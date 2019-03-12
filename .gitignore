@@ -4,3 +4,7 @@ credentials.js
 # exclude photos but not the gitkeep file
 /public/profiles/*
 !/public/profiles/.gitkeep
+fonts/*
+initial_purchases
+*.log
+public/amazon/*
