@@ -378,6 +378,7 @@ var slide_delays = [10000, 10000, 6, 10000, 10000, 10000, 10000];
 
 function next_slide(){
 	$('.slide-'+current_slide).fadeOut('fast', function(){
+		$('.progressdot-'+current_slide).hide();
 		current_slide++;
 		if (current_slide > slide_delays.length){
 			current_slide = 1;
@@ -385,6 +386,7 @@ function next_slide(){
 		$('.slide-'+current_slide).fadeIn('slow', function(){
 			setTimeout(next_slide, slide_delays[current_slide-1]);
 		});
+		$('.progressdot-'+current_slide).show();
 	});
 }
 setTimeout(next_slide, slide_delays[0]);
