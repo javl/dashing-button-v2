@@ -186,7 +186,7 @@ function analyze_image(imageUrl, instaFilename){
             for(var i=0;i<result.color.dominantColors.length;i++){
                 if(ignore_colors.indexOf(result.color.dominantColors[i].toLowerCase()) == -1){
                     search_tags.push(result.color.dominantColors[i].toLowerCase());
-                    break;
+                    // break;
                 }
             }
         }catch(e){
@@ -246,7 +246,8 @@ async function get_amazon_screenshot(keywords, instaFilename){
     try {
       (async () => {
 
-        var target_url = amazon_url + keywords.slice(0, 5).join('+');
+        // var target_url = amazon_url + keywords.slice(0, 5).join('+');
+        var target_url = amazon_url + keywords.join('+');
 
         // wayyyyyy too many try/catches here, but works well for debugging
         var browser;

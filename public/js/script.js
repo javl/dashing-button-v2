@@ -42,7 +42,6 @@ ws.onmessage = function (ev) {
 		error_and_restart();
 	}
 
-
 	else if(data.command == 'button_pressed'){
 		start_process(null);
 	}
@@ -75,7 +74,7 @@ function start_process(specified_influencer){
 	request_instagram_image();
 	set_influencer_avatar_and_name();
 
-	hide_info_slides(function(){ // hide the intro slides
+	hide_intro_slides(function(){ // hide the intro slides
 
 		setTimeout(function(){ // wait for a bit then start spinning animation
 
@@ -114,17 +113,21 @@ function start_process(specified_influencer){
 
 			});
 
-		}, delay(2000));
+		}, delay(500));
 
 	});
 }
 
-function hide_info_slides(callback){
-	$('.slides').fadeOut("slow", callback());
+function hide_intro_slides(callback){
+		$('#introModal').on('hidden.bs.modal', function (e) {
+			console.log('trigger on hide');
+		$( "#introModal").unbind( 'hidden.bs.modal' );
+		callback();
+	}).modal('hide');
 }
 
-function show_info_slides(){
-	$('.slides').fadeIn("slow");
+function show_intro_slides(){
+	$('#introModal').modal('show');
 }
 
 function show_latest_amazon_image(callback){
@@ -136,7 +139,7 @@ function show_latest_amazon_image(callback){
 			$('.tags').fadeOut("slow", function(){});
 			$('.title-searching-amazon').fadeOut("slow", function(){
 				$('.latest-amazon-image').attr('src', '/amazon/'+latest_instagram_image).fadeIn("slow", function(){
-					setTimeout(callback, 10000);
+					setTimeout(callback, 20000);
 				});
 			});
 
@@ -151,10 +154,13 @@ function show_latest_tags(callback){
 
 		var num_tags = latest_tags.length;
 		var tag_delay = 800;
+		var tags_string = '';
 		latest_tags.forEach(function(item, index){
 			// tags += item.name + '&nbsp;-&nbsp;<i>'+item.confidence.toFixed(3)+'%</i><br />';
 			$('.tags').append( '<li class="tag hide-tag">'+item.name+'</i>');
+			tags_string += item.name + ' ';
 		});
+		$('.tags-top').html(tags_string);
 
 		$('.tag').delay(tag_delay).each(function(i) {
 			$(this).delay(tag_delay * i).queue(function() {
@@ -165,7 +171,8 @@ function show_latest_tags(callback){
 		// wait for two seconds so the next animation starts
 		// when the last tag has faded in
 		setTimeout(function(){
-			$('.title-analyzing').slideUp("slow", function(){});
+			$('.title-analyzing, .tags').slideUp("slow", function(){});
+			$('.tags-top').slideDown("slow", function(){});
 			$('.title-searching-amazon').slideDown("slow", function(){
 				callback();
 			});
@@ -242,10 +249,11 @@ function highlight_selected_influencer(){
 	$('.influencer[data-name="'+influencer+'"]').removeClass('fade-out').addClass('selected');
 }
 
-function remove_influencer_highlight(){
+function remove_influencer_highlight(callback){
 	// show a circle around the avatar of the influencer we've selected before
 	$('.influencer').removeClass('fade-out');
 	$('.influencer[data-name="'+influencer+'"]').removeClass('selected');
+	setTimeout(callback, 2000);
 }
 
 function select_influencer(){
@@ -335,41 +343,59 @@ function show_image_popup(){
 }
 
 function error_and_restart(){
-	return;
 	$('.modal').modal('hide');
 	$('#errorModal').modal('show');
 	setTimeout(function(){
-		$('#errorModal').modal('hide');
+		location.reload();
+		// $('#errorModal').modal('hide');
 	}, 5000);
-	setTimeout(function(){
-		restart();
-	}, 2000);
+	// setTimeout(function(){
+	// 	restart();
+	// }, 2000);
 }
 
 // slide animation in idle mode
-var current_slide = 1;
-var max_slides = 2;
-$('.slide').hide();
-$('.slide-1').show();
+// var current_slide = 1;
+// var max_slides = 2;
+// $('.slide').hide();
+// $('.slide-1').show();
 
-setInterval(function(){
-	$('.slide-'+current_slide).fadeOut('slow', function(){
+// setInterval(function(){
+// 	$('.slide-'+current_slide).fadeOut('slow', function(){
+// 		current_slide++;
+// 		if (current_slide > max_slides){
+// 			current_slide = 1;
+// 		}
+// 		$('.slide-'+current_slide).fadeIn('slow', function(){
+
+// 		});
+// 	})
+// }, 20000);
+
+$('#introModal').modal('show');
+var current_slide = 1;
+var slide_delays = [10000, 10000, 6, 10000, 10000, 10000, 10000];
+
+function next_slide(){
+	$('.slide-'+current_slide).fadeOut('fast', function(){
 		current_slide++;
-		if (current_slide > max_slides){
+		if (current_slide > slide_delays.length){
 			current_slide = 1;
 		}
 		$('.slide-'+current_slide).fadeIn('slow', function(){
-
+			setTimeout(next_slide, slide_delays[current_slide-1]);
 		});
-	})
-}, 20000);
+	});
+}
+setTimeout(next_slide, slide_delays[0]);
 
 
 $('#latestImageModal').on('hidden.bs.modal', function (e) {
 	// done hiding, reset!
 	working = false;
-	remove_influencer_highlight();
-	show_info_slides();
+	remove_influencer_highlight(function(){
+		show_intro_slides();
+	});
 });
 
 $('.slides').on('click', function(){

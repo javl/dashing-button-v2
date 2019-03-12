@@ -10,7 +10,7 @@
 
 <body>
 
-<div class="slides">
+<!-- <div class="slides">
 
 	<div class="slide slide-1">
 		<img src="/images/slide-1-outline.svg" />
@@ -19,12 +19,28 @@
 		<img src="/images/slide-2-outline.svg" />
 	</div>
 
-</div>
+</div> -->
 <!-- Button trigger modal -->
 <!-- Modal -->
+<div class="modal fade" id="introModal" tabindex="-1" role="dialog" aria-labelledby="introModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content pb-2">
+      <div class="modal-body">
+      	<img src="/images/slide-1.png" alt="" class="slide slide-1">
+      	<img src="/images/slide-2.png" alt="" class="slide slide-2">
+      	<img src="/images/slide-3.png" alt="" class="slide slide-3">
+      	<img src="/images/slide-4.png" alt="" class="slide slide-4">
+      	<img src="/images/slide-5.png" alt="" class="slide slide-5">
+      	<img src="/images/slide-6.png" alt="" class="slide slide-6">
+      	<img src="/images/slide-7.png" alt="" class="slide slide-7">
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal fade" id="searchInstagramModal" tabindex="-1" role="dialog" aria-labelledby="searchInstagramModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
-    <div class="modal-content pb-2">
+    <div class="modal-content pb-2 pt-2">
       <div class="modal-body text-center">
       		<div class="medium-avatar">
       			<div class="spinner-border"></div>
@@ -38,7 +54,7 @@
   </div>
 </div>
 
-<div class="modal fade" id="amazonLoadingModal" tabindex="-1" role="dialog" aria-labelledby="amazonLoadingModalLabel" aria-hidden="true">
+<!-- <div class="modal fade" id="amazonLoadingModal" tabindex="-1" role="dialog" aria-labelledby="amazonLoadingModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content pb-2">
       <div class="modal-body text-center">
@@ -51,7 +67,7 @@
       </div>
     </div>
   </div>
-</div>
+</div> -->
 
 <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg" role="document">
@@ -68,9 +84,18 @@
 	<div class="modal-dialog modal-xxl" role="document">
 		<div class="modal-content">
 			<div class="modal-body">
-				<div class="row avatar-row border-bottom-gray pb-2">
+<!-- 				<div class="row avatar-row border-bottom-gray pb-2">
 					<img class="avatar modal-avatar rounded-circle" src="" alt="">
 					<h4 class='influencer-name pt-2' ></h4><img class="verified" src="/images/verified.png" />
+				</div> -->
+				<div class="row border-bottom-gray pb-2">
+					<div class="col-md-5">
+						<img class="avatar modal-avatar rounded-circle" src="" alt="">
+						<h4 class='influencer-name pt-2' ></h4><img class="verified" src="/images/verified.png" />
+					</div>
+					<div class="col-md-7 text-right">
+						<h4 class="tags-top"></span></h4>
+					</div>
 				</div>
 
 				<div class="row">
@@ -95,33 +120,6 @@
 		</div>
 	</div>
 </div>
-
-<!-- <div class="modal fade" id="sideBySideModal" tabindex="-1" role="dialog" aria-labelledby="sideBySideModalLabel" aria-hidden="true">
-	<div class="modal-dialog modal-xxl" role="document">
-		<div class="modal-content">
-			<div class="modal-body">
-				<div class="row avatar-row pb-2">
-					<div class="col-md-1 text-left">
-						<img class="avatar modal-avatar rounded-circle" src="" alt="">
-					</div>
-					<div class="col-md-11 text-left">
-						<h4 class='influencer-name'></h4><img class="verified" src="/images/verified.png" />
-					</div>
-				</div>
-
-				<div class="row">
-					<div class="col-md-5">
-						<img class="latest-img" src="" />
-					</div>
-					<div class="col-md-7">
-						<img class="latest-amazon-img" src="" />
-					</div>
-				</div>
-			</div>
-
-		</div>
-	</div>
-</div> -->
 
 <div class="influencers">
 {% for influencer in influencers %}
