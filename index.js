@@ -72,6 +72,11 @@ app.get('/api/influencer', function(req, res) {
     // });
 });
 
+app.get('/api/influencer/image', function(req, res) {
+    res.send('getting image for influencer ' + req.query.influencer_name);
+    get_latest_image(req.query.influencer_name);
+});
+
 
 app.get('/run_detection', function(req, res) {
     // res.render('index.html', {
@@ -83,7 +88,7 @@ app.get('/button_pressed', function(req, res) {
     console.log('button was pressed!');
     res.send('ok');
     send_to_clients({
-        command: 'restart'
+        command: 'button_pressed'
     });
 });
 
@@ -131,16 +136,21 @@ function get_latest_image(influencer){
                 if (useIndex == -1){
                     console.log('somehow we didn\'t get a GraphImage or GraphSidecar?');
                 }
-                var filename = media_metadata[useIndex].display_url.split('/');
-                filename = filename[filename.length-1].split('?')[0];
+                var image_filename = media_metadata[useIndex].display_url.split('/');
+                image_filename = image_filename[image_filename.length-1].split('?')[0];
 
-                analyze_image(media_metadata[useIndex].display_url, filename);
+                analyze_image(media_metadata[useIndex].display_url, image_filename);
 
 
+                // send_to_clients({
+                //     command: 'influencer_updated',
+                //     influencer: influencer,
+                //     filename: filename
+                // });
                 send_to_clients({
-                    command: 'influencer_updated',
+                    command: 'instagram_image_available',
                     influencer: influencer,
-                    filename: filename
+                    image_filename: image_filename
                 });
 
             }
@@ -235,108 +245,96 @@ app.listen(8000, function (err) {
 async function get_amazon_screenshot(keywords, instaFilename){
     try {
       (async () => {
-        const browser = await puppeteer.launch({
-            args: ['--no-sandbox', '--disable-setuid-sandbox'],
-            headless: false
-        });
-        const page = await browser.newPage();
 
-        let result = await page.evaluate(() => {
-                    return window.innerWidth;
-                });
-
-        console.log(`Detected window.innerWidth to be ${result}.`);
-        await page.setViewport({ width: 980, height: 800 });
-
-        result = await page.evaluate(() => {
-                    return window.innerWidth;
-                });
-
-        console.log(`Detected window.innerWidth to be ${result}.`);
         var target_url = amazon_url + keywords.slice(0, 5).join('+');
-        console.log('goto: ', target_url);
-        await page.goto(target_url);
-        // await page.waitForSelector('#resultsCol');
-        // await page.screenshot({path: 'public/amazon/amazon_list.png'});
-        // console.log('See screenshot: ' + 'public/amazon/amazon_list.jpg');
-        // await page.click('#pagnNextString');
-        // await page.waitForSelector('#resultsCol');
-        // const pullovers = await page.$$('a.a-link-normal.a-text-normal');
-        // const pullovers = await page.$$('s-access-image');
-        // await pullovers[1].click();
-        await page.evaluate(() => {
-            document.querySelector('.s-access-image').click();
-        });
-        await page.waitForSelector('.a-color-price');
-        console.log(page.url());
-       // const imageUrl = await page.evaluate(() =>
-       //      document.querySelector("#landingImage").getAttribute('src') // image selector
-       // ); // here we got the image url.
-    // Now just simply pass the image url to the downloader function to
-        // console.log('image: ', imageUrl);
 
-        await page.screenshot({path: 'public/amazon/'+instaFilename});
-        await browser.close();
-        console.log('See screenshot: ' + 'public/amazon/'+instaFilename);
-        send_to_clients({
-            command: 'got_amazon',
-            image_filename: instaFilename
-        });
+        // wayyyyyy too many try/catches here, but works well for debugging
+        var browser;
+        var page;
+        try {
+            browser = await puppeteer.launch({
+                args: ['--no-sandbox', '--disable-setuid-sandbox'],
+                headless: true
+            });
+            page = await browser.newPage();
+            await page.setViewport({ width: 980, height: 800 });
+        }catch (err){
+            console.error('error starting browser:');
+            console.error(err);
+        }
+
+        try {
+            await page.goto(target_url);
+        }catch(err){
+            send_to_clients({ command: 'error' });
+            console.error('error on going to target_url:');
+            console.error(err);
+        }
+
+        try {
+            await page.evaluate(() => {
+                document.querySelector('.s-access-image').click();
+            });
+        } catch (err) {
+            try {
+                await page.evaluate(() => {
+                    document.querySelector('.s-image').click();
+                });
+            } catch (err) {
+                send_to_clients({ command: 'error' });
+                console.error('error on clicking .s-access-image: ');
+                console.error(err);
+                console.error('Page with error: ');
+                console.error(page.url());
+                throw(err);
+            }
+
+        }
+
+        try {
+            await page.waitForSelector('.a-color-price');
+            console.log('Url for Amazon product: ');
+            console.log(page.url());
+            console.log('');
+        } catch (err){
+            send_to_clients({ command: 'error' });
+            console.error('error on waitForSelector .a-color-price:');
+            console.error(err);
+            console.error('Page with error: ');
+            console.error(page.url());
+            throw(err);
+        }
+
+        try {
+            // use instaFilename also for the amazon image, just store it in a
+            // different folder
+            await page.screenshot({path: 'public/amazon/'+instaFilename});
+            console.log('Screenshot saved at:');
+            console.log('public/amazon/'+instaFilename);
+
+            send_to_clients({
+                command: 'amazon_image_available',
+                image_filename: instaFilename
+            });
+
+        }catch(err){
+            send_to_clients({ command: 'error' });
+            console.log('error on taking screenshot: ');
+            console.log(err);
+            throw(err);
+        }
+
+        try {
+            await browser.close();
+        }catch(err){
+            console.log('error on clowing browser: ');
+            console.log(err);
+        }
+
+
       })();
     } catch (err) {
-      console.error(err);
+        console.log('error on get_amazon_screenshot:');
+        console.error(err);
     }
-//     await page.screenshot({
-//         path: 'public/amazon_detail.jpg',
-//             fullPage: false,
-//         });
-//     }
 }
-// async function get_amazon_screenshot(keywords){
-//     console.log("get amazon screenshot");
-//     var target_url = amazon_url + keywords.slice(0, 5).join('+');
-//     console.log("open page: " + target_url);
-//     const browser = await puppeteer.launch({
-//         args: ['--no-sandbox', '--disable-setuid-sandbox'],
-//         headless: true,
-//         // executablePath:"/usr/bin/chromium",
-//     });
-//     const page = await browser.newPage();
-//     await page.setViewport({
-//         "width": 1000,
-//         "height": 800,
-//     });
-
-//     console.log('goto page');
-//     await page.goto(target_url);
-
-//     const links = await page.evaluate(() => {
-//         const links = Array.from(document.querySelectorAll('.s-access-detail-page'));
-//         return links.map(link => link.href).slice(0, 10);
-//     });
-
-//     if (links.length > 0){
-//         console.log("go to link");
-//         await page.goto(links[0]);
-//         console.log("take screenshot");
-
-//         await page.addStyleTag({content: '.nav-flyout-anchor{display: "none"}'});
-
-//         await page.evaluate(() => {
-//             const loginButton = document.querySelector('.nav-flyout-anchor');
-//             if (loginButton !== null){
-//                 loginButton.parentNode.removeChild(loginButton);
-//             }else{
-//                 console.log("liginBUtton is null");
-//             }
-//         });
-
-//         await page.screenshot({
-//             path: 'public/amazon_detail.jpg',
-//             fullPage: false,
-//         });
-//         send_to_clients({
-//             command: 'got_amazon'
-//         });
-//     }
-// }

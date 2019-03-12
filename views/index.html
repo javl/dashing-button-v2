@@ -3,28 +3,36 @@
 <head>
 	<title>Dashing Button</title>
 	<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
-	<link rel="stylesheet" type="text/css" href="/css/stylesheet.css">
+	<link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet">
 	<link rel='stylesheet' href='/bootstrap-4.3.1-dist/css/bootstrap.min.css' >
+	<link rel="stylesheet" type="text/css" href="/css/stylesheet.css">
 </head>
 
 <body>
 
-<div class="overlay">
+<div class="slides">
 
-	<img src="/static/images/dashing-logo-large.png" />
+	<div class="slide slide-1">
+		<img src="/images/slide-1-outline.svg" />
+	</div>
+	<div class="slide slide-2">
+		<img src="/images/slide-2-outline.svg" />
+	</div>
+
 </div>
 <!-- Button trigger modal -->
 <!-- Modal -->
-<div class="modal fade" id="loadingModal" tabindex="-1" role="dialog" aria-labelledby="loadingModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg" role="document">
+<div class="modal fade" id="searchInstagramModal" tabindex="-1" role="dialog" aria-labelledby="searchInstagramModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
     <div class="modal-content pb-2">
       <div class="modal-body text-center">
-      		<span class="loading-text"></span>
-      		<br />
-      		<br />
-      		<div class="spinner-border" role="status">
-  				<span class="sr-only">Loading...</span>
-			</div>
+      		<div class="medium-avatar">
+      			<div class="spinner-border"></div>
+      			<img class="avatar rounded-circle" src=""/>
+      		</div>
+      		<span class="message-text">
+				<h2>Getting <strong>@</strong><strong class="influencer-name"></strong><span class="influencer-name-possesive"></span><br />latest Instagram photo</h2>
+      		</span>
       </div>
     </div>
   </div>
@@ -34,7 +42,7 @@
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content pb-2">
       <div class="modal-body text-center">
-      		<span class="loading-text"></span>
+      		<span class="message-text"></span>
       		<br />
       		<br />
       		<div class="spinner-border" role="status">
@@ -56,30 +64,30 @@
   </div>
 </div>
 
-<div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
-	<div class="modal-dialog modal-lg" role="document">
+<div class="modal fade" id="latestImageModal" tabindex="-1" role="dialog" aria-labelledby="latestImageModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-xxl" role="document">
 		<div class="modal-content">
-			<div class="modal-body text-center">
-				<div class="row pb-2">
-					<div class="col-md-1 text-left">
-						<img class="modal-avatar rounded-circle" src="" alt="">
-					</div>
-					<div class="col-md-11 text-left">
-						<h4 class='modal-influencer-name'></h4><img class="verified" src="/images/verified.png" />
-					</div>
+			<div class="modal-body">
+				<div class="row avatar-row border-bottom-gray pb-2">
+					<img class="avatar modal-avatar rounded-circle" src="" alt="">
+					<h4 class='influencer-name pt-2' ></h4><img class="verified" src="/images/verified.png" />
 				</div>
 
 				<div class="row">
-					<div class="col-md-9">
+					<div class="col-md-5">
 						<img class="latest-img" style="" src="" />
 					</div>
-					<div class="col-md-3 text-left">
+					<div class="col-md-7 text-left">
 						<div class="title-analyzing">
-							<h4><div class="spinner-border" role="status"></div> Analyzing image...</h4>
+							<h4>Now analyzing image to find related tags</h4>
+							<div class="spinner-border"></div>
 						</div>
-						<br />
-						<span class="tags-list text-muted text-small"></span>
-						<span class="amazon-searching-text"></span>
+						<ul class="tags"></ul>
+						<div class="title-searching-amazon">
+							<h4>Now finding a matching product on Amazon</h4>
+							<div class="spinner-border"></div>
+						</div>
+						<img class="latest-amazon-image" src="" />
 					</div>
 				</div>
 			</div>
@@ -88,16 +96,16 @@
 	</div>
 </div>
 
-<div class="modal fade" id="sideBySideModal" tabindex="-1" role="dialog" aria-labelledby="sideBySideModalLabel" aria-hidden="true">
+<!-- <div class="modal fade" id="sideBySideModal" tabindex="-1" role="dialog" aria-labelledby="sideBySideModalLabel" aria-hidden="true">
 	<div class="modal-dialog modal-xxl" role="document">
 		<div class="modal-content">
-			<div class="modal-body text-center">
-				<div class="row pb-2">
+			<div class="modal-body">
+				<div class="row avatar-row pb-2">
 					<div class="col-md-1 text-left">
-						<img class="modal-avatar rounded-circle" src="" alt="">
+						<img class="avatar modal-avatar rounded-circle" src="" alt="">
 					</div>
 					<div class="col-md-11 text-left">
-						<h4 class='modal-influencer-name'></h4><img class="verified" src="/images/verified.png" />
+						<h4 class='influencer-name'></h4><img class="verified" src="/images/verified.png" />
 					</div>
 				</div>
 
@@ -113,12 +121,12 @@
 
 		</div>
 	</div>
-</div>
+</div> -->
 
 <div class="influencers">
 {% for influencer in influencers %}
 	<div class="influencer rounded-circle" data-name="{{influencer}}">
-		<img class="influencer-img rounded-circle" data-name="{{influencer}}" src="/profiles/{{influencer}}/avatar.jpg" />
+		<img class="influencer-img medium-img rounded-circle" data-name="{{influencer}}" src="/profiles/{{influencer}}/avatar.jpg" />
 	</div>
 {% endfor %}
 </div>

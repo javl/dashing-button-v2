@@ -1,116 +1,294 @@
+
 var ws = new WebSocket('ws://localhost:40510');
 ws.onopen = function () {
-    console.log('websocket is connected ...')
-    ws.send('connected')
-}
-var working = false;
-var data = null;
-ws.onmessage = function (ev) {
-    console.log(ev);
-    data = JSON.parse(ev.data);
-    console.log(data);
-
-    if(data.command == 'influencer_updated'){
-    	show_media(data.filename);
-    }
-    else if (data.command == 'tags'){
-    	var tags = '';
-    	data.tags.forEach(function(item, index){
-   			tags += item.name + '&nbsp;-&nbsp;<i>'+item.confidence.toFixed(3)+'%</i><br />';
-    	})
-    	$('.tags-list').html(tags);
-    	$('.title-analyzing').html('<h4>'+data.tags.length+' Tags found</h4>');
-    	$('.amazon-searching-text').html('Searching for matching product on Amazon...');
-    }
-    else if(data.command == 'error'){
-    	error_and_restart();
-    }
-    else if(data.command == 'restart'){
-    	if (!working){
-    		working = true;
-    		restart();
-    	}
-    }
-    else if(data.command == 'got_amazon'){
-    	$('.latest-amazon-img').attr('src', '/amazon/'+data.image_filename);
-    	$('#sideBySideModal').modal('show');
-    }
+	ws.send('connected');
 };
 
-function show_media(filename){
-	console.log('show media');
-	if(spinning){
-		console.log('wait for spinner');
-		setTimeout(show_media, 500);
-		return;
+var debug_speed = true; // set to true to remove / speed up timers while testing
+var working = false;
+var data = null;
+
+var latest_instagram_image = null;
+var latest_amazon_image = null;
+var latest_tags = null;
+
+ws.onmessage = function (ev) {
+	data = JSON.parse(ev.data);
+
+	// when the latest insta image for the influencer has been downloaded
+	if(data.command == 'instagram_image_available'){
+		latest_instagram_image = data.image_filename;
+		console.log('instagram_image_available: ' + latest_instagram_image);
 	}
-	$('#loadingModal').modal('hide');
-	$('.latest-img').attr('src', '/profiles/'+data.influencer+'/'+filename);
-	$('.influencer-img[data-name="'+data.influencer+'"]').attr('src', '/profiles/'+data.influencer+'/avatar.jpg');
-	$('.modal-avatar').attr('src', '/profiles/'+data.influencer+'/avatar.jpg');
-	$('.modal-influencer-name').html(data.influencer);
-	$('#imageModal').modal('show');
-	// setTimeout(function(){
-	// 	$('#analyzingModal').modal('show');
-	// }, 4000);
+	else if(data.command == 'amazon_image_available'){
+		latest_amazon_image = data.image_filename;
+		console.log('amazon_image_available: ' + latest_amazon_image);
+	}
+
+	// when we receive tags from the image analyzer
+	else if (data.command == 'tags'){
+		latest_tags = data.tags;
+		// var tags = '';
+		// data.tags.forEach(function(item, index){
+				// tags += item.name + '&nbsp;-&nbsp;<i>'+item.confidence.toFixed(3)+'%</i><br />';
+		// });
+		// $('.tags-list').html(tags);
+		// $('.title-analyzing').html('<h4>'+data.tags.length+' Tags found</h4>');
+		// $('.amazon-searching-text').html('Searching for matching product on Amazon...');
+	}
+
+	// Some error occured! Just say sorry and restart (error will be in the npm log)
+	else if(data.command == 'error'){
+		error_and_restart();
+	}
+
+
+	else if(data.command == 'button_pressed'){
+		start_process(null);
+	}
+};
+
+function start_process(specified_influencer){
+	// Start the whole thing! The process (downloading image, analyzing, etc.)
+	// can take a while, so we'll add some tricks to make it feel faster.
+	// What we'll do is select an influencer straight away and start the download
+	// and analyzing scripts. While this is going on, we show a simple spinning
+	// animation as if we're still picking an influencer. This way we get a
+	// headstart with the download while the user is focused on something else.
+	if (working){
+		return;
+	}else{
+		working = true;
+	}
+
+	latest_instagram_image = null;
+	latest_amazon_image = null;
+	latest_tags = null;
+	influencer = null;
+
+	if (specified_influencer === null){
+		influencer = select_influencer();
+	}else{
+		influencer = specified_influencer;
+	}
+
+	request_instagram_image();
+	set_influencer_avatar_and_name();
+
+	hide_info_slides(function(){ // hide the intro slides
+
+		setTimeout(function(){ // wait for a bit then start spinning animation
+
+			spin_influencers(function(){
+
+				// spinning done, show 'searching' text
+				$('.title-analyzing').show();
+				$('.latest-amazon-image').hide();
+				$('.tags').show();
+				$('.title-searching-amazon').hide();
+				$('#searchInstagramModal').modal('show');
+
+				check_for_latest_instagram_image(function(){
+
+					// if we get here, the instagram image became available
+					show_latest_instagram_image();
+
+					check_for_latest_tags(function(){
+						// if we get here, the tags have been found.
+						// show them in an animated way
+
+						show_latest_tags(function(){
+
+							check_for_latest_amazon_image(function(){
+								show_latest_amazon_image(function(){
+									$('.modal').modal('hide');
+								});
+
+							});
+
+						});
+
+					});
+
+				});
+
+			});
+
+		}, delay(2000));
+
+	});
+}
+
+function hide_info_slides(callback){
+	$('.slides').fadeOut("slow", callback());
+}
+
+function show_info_slides(){
+	$('.slides').fadeIn("slow");
+}
+
+function show_latest_amazon_image(callback){
+	setTimeout(function(){
+		// if we get here, the amazon product was found
+		 console.log('amazon found, show image!');
+
+		 setTimeout(function(){
+			$('.tags').fadeOut("slow", function(){});
+			$('.title-searching-amazon').fadeOut("slow", function(){
+				$('.latest-amazon-image').attr('src', '/amazon/'+latest_instagram_image).fadeIn("slow", function(){
+					setTimeout(callback, 10000);
+				});
+			});
+
+		 }, 2000);
+	});
+}
+
+function show_latest_tags(callback){
+
+	// wait for a bit before showing tags
+	setTimeout(function(){
+
+		var num_tags = latest_tags.length;
+		var tag_delay = 800;
+		latest_tags.forEach(function(item, index){
+			// tags += item.name + '&nbsp;-&nbsp;<i>'+item.confidence.toFixed(3)+'%</i><br />';
+			$('.tags').append( '<li class="tag hide-tag">'+item.name+'</i>');
+		});
+
+		$('.tag').delay(tag_delay).each(function(i) {
+			$(this).delay(tag_delay * i).queue(function() {
+				$(this).removeClass('hide-tag');
+			});
+		});
+
+		// wait for two seconds so the next animation starts
+		// when the last tag has faded in
+		setTimeout(function(){
+			$('.title-analyzing').slideUp("slow", function(){});
+			$('.title-searching-amazon').slideDown("slow", function(){
+				callback();
+			});
+		}, (num_tags + 1 ) * tag_delay);
+
+	}, 2000);
+
+}
+
+function request_instagram_image(){
+	// use a get request to tell the server we want to receive the selected
+	// influencers latest image. The server will respond via a websocket so
+	// this function does not have callback
+	$.ajax({
+		method: "GET",
+		url: "/api/influencer/image",
+		data: { influencer_name: influencer}
+	})
+	.done(function() {
+		//
+	})
+	.fail(function() {
+		console.error('error in request_instagram_image');
+		error_and_restart();
+	});
+}
+
+function check_for_latest_instagram_image(callback){
+	if (latest_instagram_image !== null){
+		callback();
+	}else{
+		setTimeout(function(){
+			check_for_latest_instagram_image(callback);
+		}, 200);
+	}
+}
+
+function check_for_latest_amazon_image(callback){
+	if (latest_amazon_image !== null){
+		callback();
+	}else{
+		setTimeout(function(){
+			check_for_latest_amazon_image(callback);
+		}, 200);
+	}
+}
+
+function check_for_latest_tags(callback){
+	if (latest_tags !== null){
+		callback();
+	}else{
+		setTimeout(function(){
+			check_for_latest_tags(callback);
+		}, 200);
+	}
+}
+
+function show_latest_instagram_image(){
+	$('.modal').modal('hide'); // hide all modals first
+	$('.latest-img').attr('src', '/profiles/'+influencer+'/'+latest_instagram_image);
+	$('#latestImageModal').modal('show');
 }
 
 function highlight_random_influencer(){
+	// show a circle around a random influencer, used during the spinning animation
 	$('.selected').removeClass('selected');
 	var random_influencer = Math.round(Math.random() * ($('.influencer').length-1));
 	$('.influencer').eq(random_influencer).addClass('selected');
 }
 
-function highlight_influencer(influencer){
-	// $('.selected').removeClass('selected').addClass('fadeOut');
+function highlight_selected_influencer(){
+	// show a circle around the avatar of the influencer we've selected before
 	$('.influencer').removeClass('selected').addClass('fade-out');
 	$('.influencer[data-name="'+influencer+'"]').removeClass('fade-out').addClass('selected');
 }
 
+function remove_influencer_highlight(){
+	// show a circle around the avatar of the influencer we've selected before
+	$('.influencer').removeClass('fade-out');
+	$('.influencer[data-name="'+influencer+'"]').removeClass('selected');
+}
+
 function select_influencer(){
+	// randomly select one of our influencers to use
 	var random_number = Math.round(Math.random() * ($('.influencer').length-1));
 	return $('.influencer').eq(random_number).data('name');
 }
 
-// Randomly select influencers as if we're picking a random one
-// var spin_speed = 50;
-var spin_speed = 50;
-var spinning = false;
-function spin_influencers (final_influencer) {
-	spinning = true;
-	if (spin_speed<=800) {
-	// if (spin_speed<=100) {
-		highlight_random_influencer();
-		spin_speed*=1.1;
-		setTimeout(function(){
-			spin_influencers(final_influencer);
-		}, spin_speed);
+function set_influencer_avatar_and_name(){
+	// update places where the name and avatar of our selected influencer should show up
+
+	$('.influencer-name').html(influencer);
+
+	if (influencer.substr(-1) != 's'){ // joe's / joss'
+		$('.influencer-name-possesive').html('\'s');
 	}else{
-		highlight_influencer(final_influencer);
-		setTimeout(function(){
-			spin_speed = 50; // reset spin speed for next time
-			var postfix = '\'';
-			if (final_influencer.substr(-1) != 's'){
-				postfix += 's';
-			}
-			$('.loading-text').html('<h4>Searching for <strong>@'+final_influencer+'</strong>'+postfix+' latest Instagram post...</h4>')
-			$('#loadingModal').modal('show');
-			setTimeout(function(){
-				spinning = false;
-			}, 2000);
-		}, 2000);
+		$('.influencer-name-possesive').html('\'');
+	}
+
+	$('img.avatar').attr('src', '/profiles/'+influencer+'/avatar.jpg');
+}
+
+function delay(val){
+	if (!debug_speed){
+		return val;
+	}else{
+		return 0;
 	}
 }
 
-function restart(preset_influencer=null){
-	$('.influencer').removeClass('fade-out');
-	var influencer = preset_influencer;
-	if (preset_influencer === null){
-		influencer = select_influencer();
+// Randomly select influencers as if we're picking a random one
+var spin_delay = 50;
+function spin_influencers(callback){
+	spin_delay *= 1.1; // increase delay between jumps
+	if (spin_delay >= delay(1000)){ // slowed down enough, lets end this!
+		highlight_selected_influencer();
+		setTimeout(callback, delay(2000)); // wait two seconds then finish
+	}else{ // still spinning too fast, go again!
+		highlight_random_influencer();
+		setTimeout(function(){
+			spin_influencers(callback);
+		}, spin_delay);
 	}
-	$('.title-analyzing').html('<h4>Analyzing image...</h4><div class="spinner-border" role="status"></div>');
-	spin_influencers(influencer);
-	// get_influencer_media(influencer);
 }
 
 $(function() {
@@ -120,8 +298,9 @@ $(function() {
 	// $('.influencer-img').css({'border': '10px solid red'});
 
 	$('.influencer').click(function(){
-		restart($(this).data('name'));
-	})
+		console.log('start with ' + $(this).data('name'));
+		start_process($(this).data('name'));
+	});
 
 });
 
@@ -156,6 +335,7 @@ function show_image_popup(){
 }
 
 function error_and_restart(){
+	return;
 	$('.modal').modal('hide');
 	$('#errorModal').modal('show');
 	setTimeout(function(){
@@ -165,3 +345,33 @@ function error_and_restart(){
 		restart();
 	}, 2000);
 }
+
+// slide animation in idle mode
+var current_slide = 1;
+var max_slides = 2;
+$('.slide').hide();
+$('.slide-1').show();
+
+setInterval(function(){
+	$('.slide-'+current_slide).fadeOut('slow', function(){
+		current_slide++;
+		if (current_slide > max_slides){
+			current_slide = 1;
+		}
+		$('.slide-'+current_slide).fadeIn('slow', function(){
+
+		});
+	})
+}, 20000);
+
+
+$('#latestImageModal').on('hidden.bs.modal', function (e) {
+	// done hiding, reset!
+	working = false;
+	remove_influencer_highlight();
+	show_info_slides();
+});
+
+$('.slides').on('click', function(){
+	$(this).hide();
+});
