@@ -46,16 +46,21 @@ class DashButtons():
         self.buttons[mac] = function
 
     def press(self, mac):
-        if mac in self.buttons:
-            self.buttons[mac]()
-            return True
-        elif show_all_devices:
+        if show_all_devices:
             if mac in seen_devices:
                 seen_devices[mac]+=1
             else:
                 seen_devices[mac]=1
+            f = open('button_out.txt', 'a')
+            f.write(str(seen_devices))
+            f.close()
+
             print(seen_devices)
             print("----")
+
+        if mac in self.buttons:
+            self.buttons[mac]()
+            return True
         return False
 
 dashbuttons = DashButtons()
