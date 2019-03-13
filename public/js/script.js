@@ -4,7 +4,7 @@ ws.onopen = function () {
 	ws.send('connected');
 };
 
-var debug_speed = true; // set to true to remove / speed up timers while testing
+var debug_speed = false; // set to true to remove / speed up timers while testing
 var working = false;
 var data = null;
 
