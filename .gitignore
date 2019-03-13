@@ -7,4 +7,5 @@ credentials.js
 fonts/*
 initial_purchases
 *.log
-public/amazon/*
+/public/amazon/*
+!/public/amazon/.gitkeep
