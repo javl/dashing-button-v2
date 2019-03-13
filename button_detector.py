@@ -65,10 +65,10 @@ class DashButtons():
 
 dashbuttons = DashButtons()
 dashbuttons.register("18:74:2e:09:d0:07", do_something)
-# dashbuttons.register("", do_something)
-# dashbuttons.register("", do_something)
-# dashbuttons.register("", do_something)
-server = Server(netopt, dashbuttons)
+dashbuttons.register("78:e1:03:c2:57:e7", do_something)
+dashbuttons.register("18:74:2e:fe:d7:0a", do_something)
+dashbuttons.register("78:e1:03:9b:a3:f0", do_something)
+# server = Server(netopt, dashbuttons)
 
 while True :
     server.GetNextDhcpPacket()
