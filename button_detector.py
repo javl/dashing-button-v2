@@ -14,7 +14,7 @@ def do_something():
         if time.time() - lastPress < 2:
             return
     lastPress = time.time()
-    print("button has been pressed, use curl")
+    print("button has been pressed!")
     os.system('curl localhost:8000/button_pressed')
 
 netopt = {'client_listen_port':"68", 'server_listen_port':"67", 'listen_address':"0.0.0.0"}
@@ -68,6 +68,7 @@ dashbuttons.register("18:74:2e:09:d0:07", do_something)
 dashbuttons.register("78:e1:03:c2:57:e7", do_something)
 dashbuttons.register("18:74:2e:fe:d7:0a", do_something)
 dashbuttons.register("78:e1:03:9b:a3:f0", do_something)
+print("waiting for button events")
 # server = Server(netopt, dashbuttons)
 
 while True :
