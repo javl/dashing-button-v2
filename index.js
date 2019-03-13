@@ -30,17 +30,8 @@ wss = new WebSocketServer({port: 40510});
 
 wss.on('connection', function (ws) {
     ws.on('message', function (message) {
-    console.log('received: %s', message);
-});
-
-  // function sender(){
-  //   ws.send('this is a msg');
-  // }
-
-  // setInterval(
-  //   () => ws.send(`${new Date()}`),
-  //   1000
-  // )
+        console.log('received: %s', message);
+    });
 });
 
 // app.use(bodyParser.urlencoded({
@@ -75,6 +66,11 @@ app.get('/api/influencer', function(req, res) {
 app.get('/api/influencer/image', function(req, res) {
     res.send('getting image for influencer ' + req.query.influencer_name);
     get_latest_image(req.query.influencer_name);
+});
+
+app.get('/api/get_all_avatars', function(req, res) {
+    res.send('getting all avatars');
+    get_all_avatars();
 });
 
 
@@ -161,6 +157,42 @@ function get_latest_image(influencer){
                     command: 'error'
                 });
             }
+        }
+        else {
+            console.log(`instagram-scraper child process exited with code ${code}`);
+        }
+    });
+}
+
+function get_all_avatars(){
+    console.log('get_all_avatars');
+    const child = spawn('instagram-scraper',
+        ['--login-user=instaUser',
+        '--login-pass=instaPass',
+        influencers.join(','),
+        // '--latest',
+        '--maximum=1',
+        '--media-types=image',
+        '--destination=public/profiles',
+        '--retain-username'], {
+        cwd: __dirname // run in this script's directory
+    });
+    child.on('error', function(err) {
+        console.log(`Error on spawning child: ${err}`);
+    });
+
+    child.stdout.on('data', (data) => {
+        // console.log(`stdout: ${data}`);
+    });
+
+    child.stderr.on('data', (data) => {
+        console.log(`stderr: ${data}`);
+    });
+
+    child.on('close', (code) => {
+
+        if (code == 0){
+            console.log('got avatars');
         }
         else {
             console.log(`instagram-scraper child process exited with code ${code}`);
