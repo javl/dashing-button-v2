@@ -2,10 +2,14 @@ dashing-button.sublime-workspace
 node_modules
 credentials.js
 # exclude photos but not the gitkeep file
-/public/profiles/*
-!/public/profiles/.gitkeep
+/public/profiles/*/*.jpg
+!/public/profiles/*/avatar.jpg
+# !/public/profiles/.gitkeep
+# !*avatar.jpg
+# /public/profiles/*/*
 fonts/*
 initial_purchases
 *.log
 /public/amazon/*
 !/public/amazon/.gitkeep
+/public/profiles_bk
