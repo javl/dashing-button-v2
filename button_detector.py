@@ -54,9 +54,9 @@ class DashButtons():
             f = open('button_out.txt', 'a')
             f.write(str(seen_devices))
             f.close()
-
-            print(seen_devices)
-            print("----")
+            for dev in seen_devices:
+                print('device {} seen {} times'.format(dev, seen_devices[dev]))
+            print("======")
 
         if mac in self.buttons:
             self.buttons[mac]()
