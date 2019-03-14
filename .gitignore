@@ -13,3 +13,5 @@ initial_purchases
 /public/amazon/*
 !/public/amazon/.gitkeep
 /public/profiles_bk
+.DS_Store
+button_out.txt
