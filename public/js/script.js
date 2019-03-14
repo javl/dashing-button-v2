@@ -392,6 +392,7 @@ $('#latestImageModal').on('hidden.bs.modal', function (e) {
 	finish();
 });
 
-// $('.slides').on('click', function(){
+ $('.slide').on('click', function(){
+ 	$('body').css({cursor: 'default'});
 // 	$(this).hide();
-// });
+ });
