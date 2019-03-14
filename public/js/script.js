@@ -31,6 +31,7 @@ ws.onmessage = function (ev) {
 	// when we receive tags from the image analyzer
 	else if (data.command == 'tags'){
 		latest_tags = data.tags;
+		console.log(latest_tags);
 	}
 
 	// Some error occured! Just say sorry and restart (error will be in the npm log)
@@ -53,12 +54,15 @@ function start_process(specified_influencer){
 	if (working){
 		return;
 	}else{
+		console.log('start process');
 		startTime = new Date().getTime();
 		working = true;
 		// start the reset_timer that will reload the page if the whole run
 		// didn't finishg within two minutes
-		console.log('start the timeout_interval');
 		timeout_interval = setTimeout(error_and_reload, 120000);
+
+		$('.tags').html('');
+		$('.tags-top').html('').hide();
 	}
 
 	latest_instagram_image = null;
@@ -78,33 +82,29 @@ function start_process(specified_influencer){
 
 	hide_intro_slides(function(){ // hide the intro slides
 
-		setTimeout(function(){ // wait for a bit then start spinning animation
+		spin_influencers(function(){
 
-			spin_influencers(function(){
+			// spinning done, show 'searching' text
+			$('.title-analyzing').show();
+			$('.latest-amazon-image').hide();
+			$('.tags').show();
+			$('.title-searching-amazon').hide();
+			$('#searchInstagramModal').modal('show');
 
-				// spinning done, show 'searching' text
-				$('.title-analyzing').show();
-				$('.latest-amazon-image').hide();
-				$('.tags').show();
-				$('.title-searching-amazon').hide();
-				$('#searchInstagramModal').modal('show');
+			check_for_latest_instagram_image(function(){
 
-				check_for_latest_instagram_image(function(){
+				// if we get here, the instagram image became available
+				show_latest_instagram_image();
 
-					// if we get here, the instagram image became available
-					show_latest_instagram_image();
+				check_for_latest_tags(function(){
+					// if we get here, the tags have been found.
+					// show them in an animated way
 
-					check_for_latest_tags(function(){
-						// if we get here, the tags have been found.
-						// show them in an animated way
+					show_latest_tags(function(){
 
-						show_latest_tags(function(){
-
-							check_for_latest_amazon_image(function(){
-								show_latest_amazon_image(function(){
-									$('.modal').modal('hide');
-								});
-
+						check_for_latest_amazon_image(function(){
+							show_latest_amazon_image(function(){
+								$('.modal').modal('hide');
 							});
 
 						});
@@ -115,17 +115,22 @@ function start_process(specified_influencer){
 
 			});
 
-		}, delay(500));
+		});
 
 	});
 }
 
 function hide_intro_slides(callback){
+	// check if modal needs to hide or is already gone (due to using the cursor)
+	if($('#introModal').hasClass('show')){
 		$('#introModal').on('hidden.bs.modal', function (e) {
 			console.log('trigger on hide');
 		$( "#introModal").unbind( 'hidden.bs.modal' );
+			callback();
+		}).modal('hide');
+	}else{
 		callback();
-	}).modal('hide');
+	}
 }
 
 function show_intro_slides(){
@@ -157,11 +162,12 @@ function show_latest_tags(callback){
 		var num_tags = latest_tags.length;
 		var tag_delay = 800;
 		var tags_string = '';
+		$('.tags').html(''); // clear existing tags
 		latest_tags.forEach(function(item, index){
-			$('.tags').append( '<li class="tag hide-tag">'+item.name+'</i>');
-			tags_string += item.name + ' ';
+			$('.tags').append( '<li class="tag hide-tag">'+item+'</i>');
+			tags_string += item + ' ';
 		});
-		$('.tags-top').html(tags_string);
+		$('.tags-top').html('tags found: <i>' + tags_string + '</i>');
 
 		$('.tag').delay(tag_delay).each(function(i) {
 			$(this).delay(tag_delay * i).queue(function() {
@@ -177,7 +183,7 @@ function show_latest_tags(callback){
 			$('.title-searching-amazon').slideDown("slow", function(){
 				callback();
 			});
-		}, (num_tags + 1 ) * tag_delay);
+		}, 2000 + (num_tags + 1 ) * tag_delay);
 
 	}, 2000);
 
@@ -203,7 +209,7 @@ function request_instagram_image(){
 
 function check_for_latest_instagram_image(callback){
 	if (latest_instagram_image !== null){
-		callback();
+		setTimeout(callback, 3000);
 	}else{
 		setTimeout(function(){
 			check_for_latest_instagram_image(callback);
@@ -386,6 +392,6 @@ $('#latestImageModal').on('hidden.bs.modal', function (e) {
 	finish();
 });
 
-$('.slides').on('click', function(){
-	$(this).hide();
-});
+// $('.slides').on('click', function(){
+// 	$(this).hide();
+// });

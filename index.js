@@ -135,14 +135,9 @@ function get_latest_image(influencer){
                 var image_filename = media_metadata[useIndex].display_url.split('/');
                 image_filename = image_filename[image_filename.length-1].split('?')[0];
 
+                //xxx
                 analyze_image(media_metadata[useIndex].display_url, image_filename);
 
-
-                // send_to_clients({
-                //     command: 'influencer_updated',
-                //     influencer: influencer,
-                //     filename: filename
-                // });
                 send_to_clients({
                     command: 'instagram_image_available',
                     influencer: influencer,
@@ -203,18 +198,18 @@ function get_all_avatars(){
 function analyze_image(imageUrl, instaFilename){
     ms.options.body = '{"url": ' + '"' + imageUrl + '"}',
 
-    request.post(ms.options, (error, response, body) => {
+    request.post(ms.options, function(error, response, body){
         if (error) {
             console.log('Error: ', error);
             return;
         }
         var result      = JSON.parse(body);
-        var useful_tags = [];
+        // var useful_tags = [];
         var search_tags = [];
 
         try{
             var dominant_color = '';
-            var ignore_colors = ['white', 'black', 'brown']
+            var ignore_colors = ['white', 'black', 'brown'];
             for(var i=0;i<result.color.dominantColors.length;i++){
                 if(ignore_colors.indexOf(result.color.dominantColors[i].toLowerCase()) == -1){
                     search_tags.push(result.color.dominantColors[i].toLowerCase());
@@ -231,16 +226,19 @@ function analyze_image(imageUrl, instaFilename){
         }
         result.tags.forEach(function(tag, index){
             if(tag.name != 'person'){
-                useful_tags.push(tag)
+                // useful_tags.push(tag)
                 search_tags.push(tag.name);
             }
         });
 
+        let make_unique = (names) => names.filter((v,i) => names.indexOf(v) === i);
+        var unique_search_tags = make_unique(search_tags);
+
         send_to_clients({
             command: 'tags',
-            tags: useful_tags
+            tags: unique_search_tags
         });
-        get_amazon_screenshot(search_tags, instaFilename);
+        get_amazon_screenshot(unique_search_tags, instaFilename);
     });
 }
 
