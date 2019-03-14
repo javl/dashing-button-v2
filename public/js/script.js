@@ -70,6 +70,7 @@ function start_process(specified_influencer){
 		influencer = select_influencer();
 	}else{
 		influencer = specified_influencer;
+		highlight_selected_influencer();
 	}
 
 	request_instagram_image();
