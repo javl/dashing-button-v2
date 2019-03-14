@@ -12,6 +12,9 @@ var latest_instagram_image = null;
 var latest_amazon_image = null;
 var latest_tags = null;
 
+var timeout_interval = null;
+var startTime = null;
+
 ws.onmessage = function (ev) {
 	data = JSON.parse(ev.data);
 
@@ -28,18 +31,11 @@ ws.onmessage = function (ev) {
 	// when we receive tags from the image analyzer
 	else if (data.command == 'tags'){
 		latest_tags = data.tags;
-		// var tags = '';
-		// data.tags.forEach(function(item, index){
-				// tags += item.name + '&nbsp;-&nbsp;<i>'+item.confidence.toFixed(3)+'%</i><br />';
-		// });
-		// $('.tags-list').html(tags);
-		// $('.title-analyzing').html('<h4>'+data.tags.length+' Tags found</h4>');
-		// $('.amazon-searching-text').html('Searching for matching product on Amazon...');
 	}
 
 	// Some error occured! Just say sorry and restart (error will be in the npm log)
 	else if(data.command == 'error'){
-		error_and_restart();
+		error_and_reload();
 	}
 
 	else if(data.command == 'button_pressed'){
@@ -57,7 +53,12 @@ function start_process(specified_influencer){
 	if (working){
 		return;
 	}else{
+		startTime = new Date().getTime();
 		working = true;
+		// start the reset_timer that will reload the page if the whole run
+		// didn't finishg within two minutes
+		console.log('start the timeout_interval');
+		timeout_interval = setTimeout(error_and_reload, 120000);
 	}
 
 	latest_instagram_image = null;
@@ -156,7 +157,6 @@ function show_latest_tags(callback){
 		var tag_delay = 800;
 		var tags_string = '';
 		latest_tags.forEach(function(item, index){
-			// tags += item.name + '&nbsp;-&nbsp;<i>'+item.confidence.toFixed(3)+'%</i><br />';
 			$('.tags').append( '<li class="tag hide-tag">'+item.name+'</i>');
 			tags_string += item.name + ' ';
 		});
@@ -196,7 +196,7 @@ function request_instagram_image(){
 	})
 	.fail(function() {
 		console.error('error in request_instagram_image');
-		error_and_restart();
+		error_and_reload();
 	});
 }
 
@@ -289,6 +289,7 @@ var spin_delay = 50;
 function spin_influencers(callback){
 	spin_delay *= 1.1; // increase delay between jumps
 	if (spin_delay >= delay(1000)){ // slowed down enough, lets end this!
+		spin_delay = 50; // reset the spin speed for the next run
 		highlight_selected_influencer();
 		setTimeout(callback, delay(2000)); // wait two seconds then finish
 	}else{ // still spinning too fast, go again!
@@ -300,11 +301,7 @@ function spin_influencers(callback){
 }
 
 $(function() {
-	$('.hidden-at-start').hide();//removeClass('hidden-at-start');
-// var images = $('.influencer-img');
-// images.css({'opacity': 0.2});
-	// $('.influencer-img').css({'border': '10px solid red'});
-
+	$('.hidden-at-start').hide();
 	$('.influencer').click(function(){
 		console.log('start with ' + $(this).data('name'));
 		start_process($(this).data('name'));
@@ -322,7 +319,7 @@ function get_influencer_media(influencer){
 		//
 	})
 	.fail(function() {
-		error_and_restart();
+		error_and_reload();
 	});
 }
 
@@ -342,40 +339,18 @@ function show_image_popup(){
 	$('.image-popup').show();
 }
 
-function error_and_restart(){
+function error_and_reload(){
+	console.error('some error occured, reload');
 	$('.modal').modal('hide');
 	$('#errorModal').modal('show');
 	setTimeout(function(){
 		location.reload();
-		// $('#errorModal').modal('hide');
 	}, 5000);
-	// setTimeout(function(){
-	// 	restart();
-	// }, 2000);
 }
-
-// slide animation in idle mode
-// var current_slide = 1;
-// var max_slides = 2;
-// $('.slide').hide();
-// $('.slide-1').show();
-
-// setInterval(function(){
-// 	$('.slide-'+current_slide).fadeOut('slow', function(){
-// 		current_slide++;
-// 		if (current_slide > max_slides){
-// 			current_slide = 1;
-// 		}
-// 		$('.slide-'+current_slide).fadeIn('slow', function(){
-
-// 		});
-// 	})
-// }, 20000);
 
 $('#introModal').modal('show');
 var current_slide = 1;
 var slide_delays = [10000, 10000, 6000, 10000, 10000, 10000, 10000];
-// var slide_delays = [1000, 1000, 1000, 1000, 1000, 1000, 1000];
 
 function next_slide(){
 	$('.slide-'+current_slide).fadeOut('fast', function(){
@@ -392,13 +367,22 @@ function next_slide(){
 }
 setTimeout(next_slide, slide_delays[0]);
 
+function finish(){
+	var endTime = new Date().getTime();
+	console.log("total duration [s] = " + ((endTime-startTime)/1000));
 
-$('#latestImageModal').on('hidden.bs.modal', function (e) {
-	// done hiding, reset!
 	working = false;
+	if (timeout_interval){
+		console.log('clear the timeout_interval');
+		clearInterval(timeout_interval);
+	}
 	remove_influencer_highlight(function(){
 		show_intro_slides();
 	});
+}
+
+$('#latestImageModal').on('hidden.bs.modal', function (e) {
+	finish();
 });
 
 $('.slides').on('click', function(){
